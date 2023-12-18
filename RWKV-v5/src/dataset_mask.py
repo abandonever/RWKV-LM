@@ -30,10 +30,11 @@ class MyDataset(Dataset):
         self.data_offsets = []
 
         epoch_count = self.args.epoch_count
-        samples_per_epoch = args.epoch_steps * args.real_bsz
-        self.sample_len = epoch_count * samples_per_epoch
+        self.samples_per_epoch = args.epoch_steps * args.real_bsz
+        self.sample_total = epoch_count * self.samples_per_epoch
 
-        rank_zero_info(f"Sample size = {self.sample_len} (epoch_count * epoch_steps * real_bsz)")
+        rank_zero_info(f"Sample per epoch = {self.samples_per_epoch} (epoch_steps * real_bsz)")
+        rank_zero_info(f"Sample total = {self.sample_total} (epoch_count * epoch_steps * real_bsz), epoch count = {epoch_count}")
 
         self.ctx_len = args.ctx_len
         self.req_len = self.ctx_len + 1
@@ -70,7 +71,7 @@ class MyDataset(Dataset):
         rank_zero_info(f"Unique sample size = {len(self.data_offsets)} (real sample count in dataset)")
 
     def __len__(self):
-        return self.sample_len
+        return self.samples_per_epoch
 
     def __getitem__(self, idx):
         args = self.args
@@ -84,6 +85,9 @@ class MyDataset(Dataset):
         if idx >= len(self.data_offsets):
             do_random_sample = True
         elif self.req_len > (self.data_size - self.data_offsets[idx]):
+            do_random_sample = True
+
+        if self.samples_per_epoch < self.sample_total:
             do_random_sample = True
 
         ii = []

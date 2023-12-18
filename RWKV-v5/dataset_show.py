@@ -89,7 +89,7 @@ if __name__ == '__main__':
         args.data_file = "/home/zidian/PycharmProjects/json2binidx_tool/my_data/conversation_text_document"
         args.vocab_size = 65536
         args.ctx_len = 16384  # 16384
-        args.micro_bsz = 1
+        args.micro_bsz = 4
         args.devices = 2
         args.num_nodes = 1
         args.epoch_steps = 200
@@ -198,22 +198,23 @@ if __name__ == '__main__':
     tokenizer = TRIE_TOKENIZER(
         os.path.join(os.path.dirname(os.path.abspath(rwkv.rwkv_tokenizer.__file__)), args.vocab_file))
 
-    # 迭代 DataLoader 并打印每个批次的数据
-    batch_idx = 0
-    for batch_data in data_loader:
-        batch_idx += 1
-        if batch_idx <= 1 or batch_idx % 10000 == 0 or batch_idx == len(train_data):
-            if args.my_qa_mask == 1:
-                x, y, z = batch_data
-            else:
-                x, y = batch_data
-                z = torch.tensor([], dtype=torch.bfloat16)
-            xs = []
-            ys = []
-            for ids in x.numpy():
-                xs.append(tokenizer.decode(ids))
-            for ids in y.numpy():
-                ys.append(tokenizer.decode(ids))
-            rank_zero_info(f"-- Batch_{batch_idx} --\n  x {x.shape}: {x}\n  y {y.shape}: {y}\n  z {z.shape}: {z}\n  xs: {xs}\n  ys: {ys}")
+    for epoch in range(args.epoch_count):
+        # 迭代 DataLoader 并打印每个批次的数据
+        batch_idx = 0
+        for batch_data in data_loader:
+            batch_idx += 1
+            if batch_idx <= 1 or batch_idx % 10000 == 0 or batch_idx == len(train_data) // args.micro_bsz:
+                if args.my_qa_mask == 1:
+                    x, y, z = batch_data
+                else:
+                    x, y = batch_data
+                    z = torch.tensor([], dtype=torch.bfloat16)
+                xs = []
+                ys = []
+                for ids in x.numpy():
+                    xs.append(tokenizer.decode(ids))
+                for ids in y.numpy():
+                    ys.append(tokenizer.decode(ids))
+                rank_zero_info(f"-- Epoch_{epoch} Batch_{batch_idx} --\n  x {x.shape}: {x}\n  y {y.shape}: {y}\n  z {z.shape}: {z}\n  xs: {xs}\n  ys: {ys}")
 
 
