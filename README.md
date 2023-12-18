@@ -2,7 +2,22 @@
 
 > RWKV homepage: https://www.rwkv.com/ https://wiki.rwkv.com/
 
-IMPORTANT: Use deepspeed==0.7.0 pytorch-lightning==1.9.5 torch==1.13.1+cu117 and cuda 11.7.1 or 11.7 (note torch2 + deepspeed has weird bugs and hurts model performance)
+## HOW TO TEST TRAINING RWKV-5 on MiniPile (1.5G tokens) ##
+
+Use cuda 11.7.1 or 11.7 (note torch2 + deepspeed has weird bugs and hurts model performance).
+```
+pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
+pip install pytorch-lightning==1.9.5 deepspeed==0.7.0 wandb ninja
+cd RWKV-v5/
+./demo-training-prepare.sh
+./demo-training-run.sh
+(you may want to log in to wandb first)
+```
+Your loss curve should look almost exactly the same as this, with the same ups and downs (if you use the same bsz & config):
+
+![RWKV-v5-minipile](RWKV-v5-minipile.png)
+
+You can run your model using https://pypi.org/project/rwkv/ (use "rwkv_vocab_v20230424" instead of "20B_tokenizer.json")
 
 ## RWKV: Parallelizable RNN with Transformer-level LLM Performance (pronounced as "RwaKuv", from 4 major params: R W K V)
 
