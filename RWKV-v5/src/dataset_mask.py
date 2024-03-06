@@ -76,19 +76,26 @@ class MyDataset(Dataset):
     def __getitem__(self, idx):
         args = self.args
 
+        global_idx = idx
+        if hasattr(self, "real_epoch") and hasattr(self, "global_rank") and hasattr(self, "world_size"):
+            epoch = self.real_epoch
+            rank = self.global_rank
+            world_size = self.world_size
+            global_idx = epoch * self.samples_per_epoch + (idx * world_size) + rank
+
         data = self.data
         data_mask = self.data_mask
 
         # 是否做随机采样
         do_random_sample = False
 
-        if idx >= len(self.data_offsets):
+        if global_idx >= len(self.data_offsets):
             do_random_sample = True
-        elif self.req_len > (self.data_size - self.data_offsets[idx]):
+        elif self.req_len > (self.data_size - self.data_offsets[global_idx]):
             do_random_sample = True
 
-        if self.samples_per_epoch < self.sample_total:
-            do_random_sample = True
+        # if global_idx % 1000 == 0:
+        #     print(f"epoch {epoch} idx {idx} rank {rank}/{world_size} global idx {global_idx} do_random_sample {do_random_sample}")
 
         ii = []
         ll = []
@@ -106,7 +113,7 @@ class MyDataset(Dataset):
                 ll.append(d_len)
                 dd_len += d_len
         else:
-            i = self.data_offsets[idx]
+            i = self.data_offsets[global_idx]
             ii.append(i)
             ll.append(self.req_len)
 

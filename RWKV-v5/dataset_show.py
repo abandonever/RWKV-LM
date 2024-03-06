@@ -93,7 +93,7 @@ if __name__ == '__main__':
         args.devices = 2
         args.num_nodes = 1
         args.epoch_steps = 200
-        args.epoch_count = 100
+        args.epoch_count = 150
         args.my_qa_mask = 1
         args.precision = 'bf16'
         args.vocab_file = "rwkv_vocab_v20230424.txt"
@@ -198,7 +198,12 @@ if __name__ == '__main__':
     tokenizer = TRIE_TOKENIZER(
         os.path.join(os.path.dirname(os.path.abspath(rwkv.rwkv_tokenizer.__file__)), args.vocab_file))
 
+    train_data.global_rank = 0
+    train_data.world_size = 1
+
     for epoch in range(args.epoch_count):
+        train_data.real_epoch = epoch
+
         # 迭代 DataLoader 并打印每个批次的数据
         batch_idx = 0
         for batch_data in data_loader:
@@ -212,9 +217,13 @@ if __name__ == '__main__':
                 xs = []
                 ys = []
                 for ids in x.numpy():
-                    xs.append(tokenizer.decode(ids))
+                    xt = tokenizer.decode(ids)
+                    xt = xt[:50] + f"...{len(xt)}..." + xt[-50:] if len(xt) > 100 else xt
+                    xs.append(xt)
                 for ids in y.numpy():
-                    ys.append(tokenizer.decode(ids))
+                    yt = tokenizer.decode(ids)
+                    yt = yt[:50] + f"...{len(yt)}..." + yt[-50:] if len(yt) > 100 else yt
+                    ys.append(yt)
                 rank_zero_info(f"-- Epoch_{epoch} Batch_{batch_idx} --\n  x {x.shape}: {x}\n  y {y.shape}: {y}\n  z {z.shape}: {z}\n  xs: {xs}\n  ys: {ys}")
 
 
