@@ -4,10 +4,19 @@
 
 ### HOW TO TEST TRAINING RWKV-5 on MiniPile (1.5G tokens) ##
 
-Use python 3.10 and cuda 11.7.1 / 11.7 (note torch2 + deepspeed has weird bugs and hurts model performance).
+For reference, use python 3.10, torch==1.13.1+cu117, cuda 11.7.1
+
+For best performance, use python 3.10, torch 2.1.2+cu121 (or latest), cuda 12.3+, **latest deepspeed**, but **keep pytorch-lightning==1.9.5**
+
 ```
+reference:
 pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
 pip install pytorch-lightning==1.9.5 deepspeed==0.7.0 wandb ninja
+
+best performance:
+pip install torch --upgrade --extra-index-url https://download.pytorch.org/whl/cu121
+pip install pytorch-lightning==1.9.5 deepspeed wandb ninja --upgrade
+
 cd RWKV-v5/
 ./demo-training-prepare.sh
 ./demo-training-run.sh
@@ -19,13 +28,25 @@ Your loss curve should look almost exactly the same as this, with the same ups a
 
 You can run your model using https://pypi.org/project/rwkv/ (use "rwkv_vocab_v20230424" instead of "20B_tokenizer.json")
 
+**Train RWKV-6**: use /RWKV-v5/ and add --my_testing "x060" to demo-training-prepare.sh and demo-training-run.sh
+
+**Simple inference for RWKV-5**: https://github.com/BlinkDL/ChatRWKV/blob/main/RWKV_v5_demo.py
+
+**Simple inference for RWKV-6**: https://github.com/BlinkDL/ChatRWKV/blob/main/RWKV_v6_demo.py
+
+lm_eval: https://github.com/BlinkDL/ChatRWKV/blob/main/run_lm_eval.py
+
+chat demo for developers: https://github.com/BlinkDL/ChatRWKV/blob/main/API_DEMO_CHAT.py
+
 ### HOW TO FINETUNE RWKV-5 MODELS ##
 
 Use .jsonl format for your data (see https://huggingface.co/BlinkDL/rwkv-5-world for formats).
 
-Use https://github.com/BlinkDL/RWKV-LM/blob/main/RWKV-v5/make_data.py to tokenizer it into binidx suitable for training.
+Use https://github.com/BlinkDL/RWKV-LM/blob/main/RWKV-v5/make_data.py to tokenizer it using World tokenizer into binidx, suitable for finetuning World models.
 
-## RWKV: Parallelizable RNN with Transformer-level LLM Performance (pronounced as "RwaKuv", from 4 major params: R W K V)
+Rename the base checkpoint in your model folder to rwkv-init.pth, and change the training commands to use --n_layer 32 --n_embd 4096 --vocab_size 65536 --lr_init 1e-5 --lr_final 1e-5 for 7B.
+
+## RWKV: Parallelizable RNN with Transformer-level LLM Performance (pronounced as "RwaKuv" (rʌkuv in IPA), from 4 major params: R W K V)
 
 RWKV is an RNN with Transformer-level LLM performance, which can also be directly trained like a GPT transformer (parallelizable). And it's 100% attention-free. You only need the hidden state at position t to compute the state at position t+1. You can use the "GPT" mode to quickly compute the hidden state for the "RNN" mode.
 
@@ -33,9 +54,9 @@ So it's combining the best of RNN and transformer - **great performance, fast in
 
 Our latest version is **RWKV-6**, which is easily Mamba level, and simpler ;) https://twitter.com/BlinkDL_AI/status/1732791817073229881 https://twitter.com/BlinkDL_AI/status/1713967928209752128 (Preview models: https://huggingface.co/BlinkDL/temp )
 
-**RWKV-5 World v2 1.5B** Demo: https://huggingface.co/spaces/BlinkDL/RWKV-Gradio-1
+**RWKV-6 World v2 1.6B** Demo: https://huggingface.co/spaces/BlinkDL/RWKV-Gradio-1
 
-**RWKV-5 World v2 3B** Demo: https://huggingface.co/spaces/BlinkDL/RWKV-Gradio-2
+**RWKV-5 World v2 7B** Demo: https://huggingface.co/spaces/BlinkDL/RWKV-Gradio-2
 
 ![RWKV-v5-benchmark-1](RWKV-v5-benchmark-1.png)
 
