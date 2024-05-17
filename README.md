@@ -2,7 +2,15 @@
 
 RWKV homepage: https://www.rwkv.com
 
-RWKV-5/6 Eagle/Finch paper: https://arxiv.org/abs/2404.05892
+**RWKV-5/6 Eagle/Finch paper**: https://arxiv.org/abs/2404.05892
+
+**RWKV-6 3B** Demo: https://huggingface.co/spaces/BlinkDL/RWKV-Gradio-1
+
+**RWKV-6 7B** Demo: https://huggingface.co/spaces/BlinkDL/RWKV-Gradio-2
+
+**RWKV-6 GPT-mode demo code (with comments and explanations)**: https://github.com/BlinkDL/RWKV-LM/blob/main/RWKV-v5/rwkv_v6_demo.py
+
+RWKV-6 RNN-mode demo: https://github.com/BlinkDL/ChatRWKV/blob/main/RWKV_v6_demo.py
 
 ![MQAR](Research/RWKV-6-MQAR.png)
 
@@ -64,9 +72,17 @@ Rename the base checkpoint in your model folder to rwkv-init.pth, and change the
 
 0.1B = --n_layer 12 --n_embd 768 // 0.4B = --n_layer 24 --n_embd 1024 // 1.5B = --n_layer 24 --n_embd 2048 // 3B = --n_layer 32 --n_embd 2560 // 7B = --n_layer 32 --n_embd 4096
 
+### State-tuning (tuning the initial state. zero inference overhead)
+
+Currently unoptimized implementation, takes same vram as full SFT
+
+```--train_type "states" --load_partial 1 --lr_init 1 --lr_final 0.01 --warmup_steps 10 (yes, use very high LR)```
+
+use rwkv 0.8.26+ to auto-load the trained "time_state" 
+
 ### Initializing RWKV 5/6 Models ###
 
-Check generate_init_weight() of src/model.py:
+When you train RWKV from scratch, try my initialization for best performance. Check generate_init_weight() of src/model.py:
 ```
 emb.weight => nn.init.uniform_(a=-1e-4, b=1e-4)
 (Note ln0 of block0 is the layernorm for emb.weight)
@@ -84,16 +100,13 @@ ffn.key.weight => nn.init.orthogonal_(gain=1)
 ffn.value.weight => zero
 ffn.receptance.weight => zero
 ```
+!!! If you are using positional embedding, maybe it's better to remove block.0.ln0 and use default initialization for emb.weight instead of my uniform_(a=-1e-4, b=1e-4) !!!
 
 ## Introducing RWKV
 
 RWKV is an RNN with Transformer-level LLM performance, which can also be directly trained like a GPT transformer (parallelizable). And it's 100% attention-free. You only need the hidden state at position t to compute the state at position t+1. You can use the "GPT" mode to quickly compute the hidden state for the "RNN" mode.
 
 So it's combining the best of RNN and transformer - **great performance, fast inference, saves VRAM, fast training, "infinite" ctx_len, and free sentence embedding** (using the final hidden state).
-
-**RWKV-6 World v2 1.6B** Demo: https://huggingface.co/spaces/BlinkDL/RWKV-Gradio-1
-
-**RWKV-5 World v2 7B** Demo: https://huggingface.co/spaces/BlinkDL/RWKV-Gradio-2
 
 ![RWKV-v5-benchmark-1](RWKV-v5-benchmark-1.png)
 

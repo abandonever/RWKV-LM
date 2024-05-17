@@ -19,6 +19,7 @@ if __name__ == "__main__":
     parser.add_argument("--wandb", default="", type=str)  # wandb project name. if "" then don't use wandb
     parser.add_argument("--proj_dir", default="out", type=str)
     parser.add_argument("--random_seed", default="-1", type=int)
+    parser.add_argument("--train_type", default="", type=str) # ""/"states"
 
     parser.add_argument("--data_file", default="", type=str)
     parser.add_argument("--data_type", default="utf-8", type=str)
@@ -117,6 +118,7 @@ if __name__ == "__main__":
     os.environ["RWKV_MY_TESTING"] = args.my_testing
     os.environ["RWKV_CTXLEN"] = str(args.ctx_len)
     os.environ["RWKV_HEAD_SIZE_A"] = str(args.head_size_a)
+    os.environ["RWKV_TRAIN_TYPE"] = args.train_type
     if args.dim_att <= 0:
         args.dim_att = args.n_embd
     if args.dim_ffn <= 0:
@@ -277,6 +279,13 @@ if __name__ == "__main__":
             rank_zero_info(f"Trying {args.load_model}")
             load_dict = torch.load(args.load_model, map_location="cpu")
 
+    state_file = f"{args.proj_dir}/rwkv-init-state.pth"
+    if os.path.isfile(state_file):
+        rank_zero_info(f"########## Loading State {state_file}... ##########")
+        state_dict = torch.load(state_file, map_location="cpu")
+        for k in state_dict:
+            load_dict[k] = state_dict[k]
+
     if args.load_partial == 1:
         load_keys = load_dict.keys()
         for k in model.state_dict():
@@ -298,10 +307,12 @@ if __name__ == "__main__":
         for n in model.state_dict():
             shape = model.state_dict()[n].shape
             shape = [i for i in shape if i != 1]
-            if len(shape) > 1:
-                print(f"{str(shape[0]).ljust(5)} {str(shape[1]).ljust(5)} {n}")
+            if len(shape) > 2:
+                print(f"{str(shape[0]).ljust(5)} {str(shape[1]).ljust(5)} {str(shape[2]).ljust(5)} {n}")
+            elif len(shape) > 1:
+                print(f"{str(shape[0]).ljust(5)} {str(shape[1]).ljust(5)}       {n}")
             else:
-                print(f"{str(shape[0]).ljust(5)}       {n}")
+                print(f"{str(shape[0]).ljust(5)}             {n}")
 
     if "deepspeed" in args.strategy:
         trainer.strategy.config["zero_optimization"]["allgather_bucket_size"] = args.ds_bucket_mb * 1000 * 1000
@@ -309,5 +320,13 @@ if __name__ == "__main__":
 
     # must set shuffle=False, persistent_workers=False (because worker is in another thread)
     data_loader = DataLoader(train_data, shuffle=False, pin_memory=True, batch_size=args.micro_bsz, num_workers=1, persistent_workers=False, drop_last=True)
+
+    # if args.train_type == 'states':
+    #     model.requires_grad_(False)
+    #     for name, module in model.named_modules():
+    #         for pname, param in module.named_parameters():
+    #             if pname.endswith('.time_state') and pname.startswith('blocks.'):
+    #                 print(pname)
+    #                 param.requires_grad = True
 
     trainer.fit(model, data_loader)
