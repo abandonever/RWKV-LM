@@ -56,6 +56,8 @@ advanced: repeat your SFT data 3 or 4 times in your jsonl (note make_data.py wil
 
 **Simple inference for RWKV-6**: https://github.com/BlinkDL/ChatRWKV/blob/main/RWKV_v6_demo.py
 
+**Note: In [state = kv + w * state] everything must be in fp32 because w can be very close to 1. So we can keep state and w in fp32, and convert kv to fp32.**
+
 lm_eval: https://github.com/BlinkDL/ChatRWKV/blob/main/run_lm_eval.py
 
 chat demo for developers: https://github.com/BlinkDL/ChatRWKV/blob/main/API_DEMO_CHAT.py
@@ -148,19 +150,19 @@ https://github.com/OpenGVLab/Vision-RWKV Vision RWKV
 
 https://github.com/feizc/Diffusion-RWKV Diffusion RWKV
 
-https://github.com/cgisky1980/ai00_rwkv_server Fastest WebGPU inference (nVidia/AMD/Intel), supports rwkv5 & rwkv6
+https://github.com/cgisky1980/ai00_rwkv_server Fastest WebGPU inference (nVidia/AMD/Intel)
 
 https://github.com/cryscan/web-rwkv backend for ai00_rwkv_server
 
-https://github.com/saharNooby/rwkv.cpp Fast CPU/cuBLAS/CLBlast inference: int4/int8/fp16/fp32, supports rwkv5
+https://github.com/saharNooby/rwkv.cpp Fast CPU/cuBLAS/CLBlast inference: int4/int8/fp16/fp32
 
-https://github.com/daquexian/faster-rwkv supports rwkv5
-
-https://github.com/mlc-ai/mlc-llm/pull/1275 supports rwkv5
+https://github.com/JL-er/RWKV-PEFT lora/pissa/Qlora/Qpissa/state tuning
 
 https://github.com/RWKV/RWKV-infctx-trainer Infctx trainer
 
-https://github.com/Blealtan/RWKV-LM-LoRA LoRA finetuning
+https://github.com/daquexian/faster-rwkv
+
+https://github.com/mlc-ai/mlc-llm/pull/1275
 
 https://github.com/TheRamU/Fay/blob/main/README_EN.md Digital Assistant with RWKV
 
