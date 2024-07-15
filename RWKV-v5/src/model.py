@@ -315,6 +315,8 @@ class RWKV_Tmix_x060(MyModule):
             self.time_maa_g = nn.Parameter(1.0 - torch.pow(ddd, 0.5 * ratio_1_to_almost0))
 
             D_MIX_LORA = 32 # generate TIME_MIX for w,k,v,r,g
+            if args.n_embd == 4096:
+                D_MIX_LORA = 64
             self.time_maa_w1 = nn.Parameter(torch.zeros(args.n_embd, D_MIX_LORA*5))
             self.time_maa_w2 = nn.Parameter(torch.zeros(5, D_MIX_LORA, args.n_embd).uniform_(-0.01, 0.01))
 
@@ -325,6 +327,8 @@ class RWKV_Tmix_x060(MyModule):
             self.time_decay = nn.Parameter(decay_speed.reshape(1,1,args.dim_att))
 
             D_DECAY_LORA = 64
+            if args.n_embd == 4096:
+                D_DECAY_LORA = 128
             self.time_decay_w1 = nn.Parameter(torch.zeros(args.n_embd, D_DECAY_LORA))
             self.time_decay_w2 = nn.Parameter(torch.zeros(D_DECAY_LORA, args.dim_att).uniform_(-0.01, 0.01))
 
@@ -404,6 +408,8 @@ class RWKV_Tmix_x060_state(MyModule):
             self.time_maa_g = nn.Parameter(1.0 - torch.pow(ddd, 0.5 * ratio_1_to_almost0))
 
             D_MIX_LORA = 32 # generate TIME_MIX for w,k,v,r,g
+            if args.n_embd == 4096:
+                D_MIX_LORA = 64
             self.time_maa_w1 = nn.Parameter(torch.zeros(args.n_embd, D_MIX_LORA*5))
             self.time_maa_w2 = nn.Parameter(torch.zeros(5, D_MIX_LORA, args.n_embd).uniform_(-0.01, 0.01))
 
@@ -414,6 +420,8 @@ class RWKV_Tmix_x060_state(MyModule):
             self.time_decay = nn.Parameter(decay_speed.reshape(1,1,args.dim_att))
 
             D_DECAY_LORA = 64
+            if args.n_embd == 4096:
+                D_DECAY_LORA = 128
             self.time_decay_w1 = nn.Parameter(torch.zeros(args.n_embd, D_DECAY_LORA))
             self.time_decay_w2 = nn.Parameter(torch.zeros(D_DECAY_LORA, args.dim_att).uniform_(-0.01, 0.01))
 
@@ -507,6 +515,8 @@ class RWKV_Tmix_x060a(MyModule):
             self.time_maa_g = nn.Parameter(1.0 - torch.pow(ddd, 0.5 * ratio_1_to_almost0))
 
             D_MIX_LORA = 32 # generate TIME_MIX for w,k,v,r,g
+            if args.n_embd == 4096:
+                D_MIX_LORA = 64
             self.time_maa_w1 = nn.Parameter(torch.zeros(args.n_embd, D_MIX_LORA*5))
             self.time_maa_w2 = nn.Parameter(torch.zeros(5, D_MIX_LORA, args.n_embd).uniform_(-0.01, 0.01))
 
@@ -517,6 +527,8 @@ class RWKV_Tmix_x060a(MyModule):
             self.time_decay = nn.Parameter(decay_speed.reshape(1,1,args.dim_att))
 
             D_DECAY_LORA = 64
+            if args.n_embd == 4096:
+                D_DECAY_LORA = 128
             self.time_decay_w1 = nn.Parameter(torch.zeros(args.n_embd, D_DECAY_LORA))
             self.time_decay_w2 = nn.Parameter(torch.zeros(D_DECAY_LORA, args.dim_att).uniform_(-0.01, 0.01))
 
@@ -596,6 +608,8 @@ class RWKV_Tmix_x060b(MyModule):
             self.time_maa_v = nn.Parameter(1.0 - (torch.pow(ddd, ratio_1_to_almost0) + 0.3 * ratio_0_to_1))
             self.time_maa_w = nn.Parameter(1.0 - torch.pow(ddd, ratio_1_to_almost0))
             D_MIX_LORA = 32
+            if args.n_embd == 4096:
+                D_MIX_LORA = 64
             self.time_maa_rkvw_w1 = nn.Parameter(torch.zeros(args.n_embd, D_MIX_LORA*4))
             self.time_maa_rkvw_w2 = nn.Parameter(torch.zeros(4, D_MIX_LORA, args.n_embd).uniform_(-0.01, 0.01))
 
@@ -604,6 +618,8 @@ class RWKV_Tmix_x060b(MyModule):
                 decay_speed[n] = -6 + 5 * (n / (args.dim_att - 1)) ** (0.7 + 1.3 * ratio_0_to_1)
             self.time_decay = nn.Parameter(decay_speed.reshape(1,1,args.dim_att))
             D_DECAY_LORA = 64
+            if args.n_embd == 4096:
+                D_DECAY_LORA = 128
             self.time_decay_w1 = nn.Parameter(torch.zeros(args.n_embd, D_DECAY_LORA))
             self.time_decay_w2 = nn.Parameter(torch.zeros(D_DECAY_LORA, args.dim_att).uniform_(-0.01, 0.01))
 
@@ -673,6 +689,8 @@ class RWKV_Tmix_x060c(MyModule):
             self.time_maa_v = nn.Parameter(1.0 - (torch.pow(ddd, ratio_1_to_almost0) + 0.3 * ratio_0_to_1))
             self.time_maa_w = nn.Parameter(1.0 - torch.pow(ddd, ratio_1_to_almost0))
             D_MIX_LORA = 32
+            if args.n_embd == 4096:
+                D_MIX_LORA = 64
             self.time_maa_rkvw_w1 = nn.Parameter(torch.zeros(args.n_embd, D_MIX_LORA*4))
             self.time_maa_rkvw_w2 = nn.Parameter(torch.zeros(4, D_MIX_LORA, args.n_embd).uniform_(-0.01, 0.01))
 
@@ -681,6 +699,8 @@ class RWKV_Tmix_x060c(MyModule):
                 decay_speed[n] = -6 + 5 * (n / (args.dim_att - 1)) ** (0.7 + 1.3 * ratio_0_to_1)
             self.time_decay = nn.Parameter(decay_speed.reshape(1,1,args.dim_att))
             D_DECAY_LORA = 64
+            if args.n_embd == 4096:
+                D_DECAY_LORA = 128
             self.time_decay_w1 = nn.Parameter(torch.zeros(args.n_embd, D_DECAY_LORA))
             self.time_decay_w2 = nn.Parameter(torch.zeros(D_DECAY_LORA, args.dim_att).uniform_(-0.01, 0.01))
 

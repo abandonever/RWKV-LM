@@ -71,7 +71,7 @@ class MyDataset(Dataset):
         rank_zero_info(f"Unique sample size = {len(self.data_offsets)} (real sample count in dataset)")
 
     def __len__(self):
-        return self.samples_per_epoch
+        return self.args.epoch_steps * self.args.micro_bsz
 
     def __getitem__(self, idx):
         args = self.args
